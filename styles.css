@@ -1,0 +1,144 @@
+body {
+    margin: 0;
+    font-family: sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    background-color: rgb(48, 158, 153);
+    padding: 15px 25px;
+    color: white;
+}
+
+.header a {
+    color: white;
+    text-decoration: none;
+}
+
+.body {
+    height: max-content;
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.center-content {
+    margin: auto;
+    width: 90%;
+    min-height: 75%;
+    display: flex;
+    flex-direction: column;
+}
+
+.card {
+
+    border: 1px solid lightgrey;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 5px 5px 15px lightgrey;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin: 20px;
+}
+
+.card-body {
+    margin: 10px 0;
+    flex: 1;
+}
+
+.card-footer .page-btn {
+    margin: 5px 5px;
+    border: 0;
+    border-radius: 5px;
+    min-width: 25px;
+    min-height: 25px;
+    cursor: pointer;
+}
+
+.card-footer .page-btn-marked {
+    background-color: rgba(48, 158, 153, 0.418);
+}
+
+.card-footer .page-btn-current {
+    border: 1px solid grey;
+}
+
+.card-footer .page-btn-wrong {
+    background-color: rgba(158, 48, 48, 0.418);
+}
+
+
+.btn {
+    color: white;
+    background-color: rgb(48, 158, 153);
+    border-radius: 10px;
+    border: 0;
+    padding: 10px;
+    min-width: 100px;
+    margin: 10px;
+    cursor: pointer;
+}
+
+
+.card-footer .btn-disabled {
+    background-color: rgb(194, 194, 194);
+}
+
+.question-option {
+    padding: 5px;
+    margin: 5px 0;
+    border-radius: 10px;
+    border: 1px solid rgb(240, 240, 240);
+}
+
+.question-hover:hover {
+    background-color: rgb(240, 240, 240);
+}
+
+.correct {
+    background-color: rgb(223, 255, 223);
+}
+
+.question-option > input {
+    margin-right: 15px;
+}
+
+.config-select-box {
+    margin: 20px 0;
+}
+
+.config-select-box select {
+    display: block;
+    margin-top: 5px;
+    padding: 5px;
+}
+
+.center-element {
+    display: flex;
+    justify-content: center;
+}
+
+.result-tab span {
+    display: block;
+    margin: 10px 0;
+}
+
+.small-text {
+    font-size: .75rem;
+    font-weight: bold;
+}
+
+.question-difficulty {
+    margin-left : 25px;
+    padding: 5px;
+    border: 1px solid grey;
+    display: inline-block;
+    width: 70px;
+    text-align: center;
+    border-radius: 10px;
+}
