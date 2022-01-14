@@ -776,6 +776,7 @@ let controller = (function () {
             }
         ).catch(() => {
             alert("You are offline");
+            setContainerElement(homePageCard.getCard());
         });
     }
 
