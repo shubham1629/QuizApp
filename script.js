@@ -257,9 +257,9 @@ let cardBuilder = (function () {
         return footer;
     }
 
-    function createOptionElement(name, val, str, isMultiOptions) {
+    function createOptionElement(name, val, str, isMultiOptions, inputClick) {
         let container = elementBuilder.createElement("div", undefined, "question-option");
-        let input = elementBuilder.createInputElement(isMultiOptions? "checkbox": "radio", undefined, undefined, name, val);
+        let input = elementBuilder.createInputElement(isMultiOptions? "checkbox": "radio", undefined, undefined, name, val, inputClick);
         let label = elementBuilder.createElement("label", undefined, undefined, str);
         container.appendChild(input);
         container.appendChild(label);
@@ -379,6 +379,8 @@ let QuestionCard = function (cardE, idE, difficultyE, titleE, hintE, optionConta
             clear.style.visibility = "visible";
         }
 
+        
+
         if (currentPageButton)
             currentPageButton.classList.remove("page-btn-current");
         currentPageButton = pageElements[+question.id - 1];
@@ -390,7 +392,7 @@ let QuestionCard = function (cardE, idE, difficultyE, titleE, hintE, optionConta
         let index = 1;
         optionsElement = [];
         for (const optionMsg of question.options) {
-            let opt = createOptionElement("option", index, optionMsg, question.isMulti);
+            let opt = createOptionElement("option", index, optionMsg, question.isMulti, ()=> setPageMarked(true));
             optionsConatinerElement.appendChild(opt.container);
             if (question.isSubmited) {
                 opt.input.disabled = true;
@@ -425,28 +427,33 @@ let QuestionCard = function (cardE, idE, difficultyE, titleE, hintE, optionConta
             if (optionElement.checked)
                 selected.push(+optionElement.value);
         }
-        question.selected = selected;
-        if (selected.length > 0)
-            currentPageButton.classList.add("page-btn-marked");
         return selected;
+    }
+
+    function setPageMarked(isMarked) {
+        console.log(isMarked);
+        if(isMarked)
+            currentPageButton.classList.add("page-btn-marked");
+        else
+            currentPageButton.classList.remove("page-btn-marked");
     }
 
     function setFunctions(nextFun, prevFun, submitFun) {
         next.onclick = () => {
             if (!question.isSubmited) {
-                getSelectedOptions();
+                question.selected = getSelectedOptions();
             }
             nextFun();
         }
         prev.onclick = () => {
             if (!question.isSubmited) {
-                getSelectedOptions();
+                question.selected = getSelectedOptions();
             }
             prevFun();
         }
         submit.onclick = () => {
             if (!question.isSubmited) {
-                getSelectedOptions();
+                question.selected = getSelectedOptions();
             }
             submitFun();
         }
@@ -462,7 +469,7 @@ let QuestionCard = function (cardE, idE, difficultyE, titleE, hintE, optionConta
                 opt.checked = false;
             }
             question.selected = [];
-            pageElements[question.id - 1].classList.remove("page-btn-marked");
+            setPageMarked(false);
         }
     }
 
