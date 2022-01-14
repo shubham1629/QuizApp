@@ -677,99 +677,99 @@ let controller = (function () {
 
     let startTest = () => {
         setContainerElement(loadingElement.getCard());
-        // quizAPI.getQuestions(noOfQuest, categoryType, difficultyType).then(
-        //     questions => {
-        //         cardBuilder.getMessageCard();
-        //         let qCard = cardBuilder.getQuestionCard();
-        //         let selected = 0;
-        //         let score;
+        quizAPI.getQuestions(noOfQuest, categoryType, difficultyType).then(
+            questions => {
+                cardBuilder.getMessageCard();
+                let qCard = cardBuilder.getQuestionCard();
+                let selected = 0;
+                let score;
 
-        //         qCard.setTotalQuestions(questions.length, (i) => {
-        //             selected = i - 1;
-        //             qCard.setQuestion(questions[selected]);
-        //         })
+                qCard.setTotalQuestions(questions.length, (i) => {
+                    selected = i - 1;
+                    qCard.setQuestion(questions[selected]);
+                })
 
-        //         let next = () => {
-        //             if (selected < questions.length - 1) {
-        //                 selected++;
-        //                 qCard.setQuestion(questions[selected]);
-        //             }
-        //         }
+                let next = () => {
+                    if (selected < questions.length - 1) {
+                        selected++;
+                        qCard.setQuestion(questions[selected]);
+                    }
+                }
 
-        //         let prev = () => {
-        //             if (selected > 0) {
-        //                 selected--;
-        //                 qCard.setQuestion(questions[selected]);
-        //             }
-        //         }
+                let prev = () => {
+                    if (selected > 0) {
+                        selected--;
+                        qCard.setQuestion(questions[selected]);
+                    }
+                }
 
-        //         let submit = () => {
-        //             clearInterval(timerInterval);
-        //             let isHighest = false;
-        //             if (score === undefined) {
-        //                 let marks = 0;
-        //                 let correctCount = 0;
-        //                 let wrongCount = 0;
-        //                 let wrongIds = [];
-        //                 for (let question of questions) {
-        //                     question.submit();
-        //                     if (question.answer.length != question.selected.length)
-        //                         continue;
-        //                     wrongIds.push(question.id);
-        //                     wrongCount++;
-        //                     marks -= question.negative;
-        //                     question.answer.sort();
-        //                     let isCorrect = true;
-        //                     for (let i = 0; i < question.answer.length; ++i) {
-        //                         if (question.answer[i] != question.selected[i]) {
-        //                             isCorrect = false;
-        //                             break;
-        //                         }
-        //                     }
-        //                     if (!isCorrect)
-        //                         continue;
-        //                     marks += question.mark + question.negative;
-        //                     correctCount++;
-        //                     wrongCount--;
-        //                     wrongIds.pop();
-        //                 }
-        //                 selected = 0;
-        //                 score = Score(name, marks, correctCount, wrongCount, questions.length, time - startTime);
-        //                 qCard.markWrongPages(wrongIds);
-        //                 if (marks > higgestScore) {
-        //                     setHighest(marks);
-        //                     isHighest = true;
-        //                 }
-        //             }
-        //             scoreCard.setScore(score, () => {
-        //                 setContainerElement(qCard.getElement());
-        //                 qCard.setQuestion(questions[selected]);
-        //             }, isHighest);
-        //             setContainerElement(scoreCard.getCard());
-        //         }
-        //         qCard.setQuestion(questions[selected]);
-        //         qCard.setFunctions(next, prev, submit);
-        //         setContainerElement(qCard.getElement());
-        //         let startTime = getTime();
-        //         let endTime = startTime + totalTimeInMilli;
-        //         let time = startTime;
-        //         setTimer(totalTimeInMilli);
-        //         let timerInterval = setInterval(() => {
-        //             time = getTime();
-        //             remainingTime = endTime - time;
-        //             if (remainingTime <= 0) {
-        //                 clearInterval(timerInterval);
-        //                 qCard.getSelectedOptions();
-        //                 setTimer(0);
-        //                 submit();
-        //             } else {
-        //                 setTimer(remainingTime);
-        //             }
-        //         }, 1000);
-        //     }
-        // ).catch(() => {
-        //     alert("You are offline");
-        // });
+                let submit = () => {
+                    clearInterval(timerInterval);
+                    let isHighest = false;
+                    if (score === undefined) {
+                        let marks = 0;
+                        let correctCount = 0;
+                        let wrongCount = 0;
+                        let wrongIds = [];
+                        for (let question of questions) {
+                            question.submit();
+                            if (question.answer.length != question.selected.length)
+                                continue;
+                            wrongIds.push(question.id);
+                            wrongCount++;
+                            marks -= question.negative;
+                            question.answer.sort();
+                            let isCorrect = true;
+                            for (let i = 0; i < question.answer.length; ++i) {
+                                if (question.answer[i] != question.selected[i]) {
+                                    isCorrect = false;
+                                    break;
+                                }
+                            }
+                            if (!isCorrect)
+                                continue;
+                            marks += question.mark + question.negative;
+                            correctCount++;
+                            wrongCount--;
+                            wrongIds.pop();
+                        }
+                        selected = 0;
+                        score = Score(name, marks, correctCount, wrongCount, questions.length, time - startTime);
+                        qCard.markWrongPages(wrongIds);
+                        if (marks > higgestScore) {
+                            setHighest(marks);
+                            isHighest = true;
+                        }
+                    }
+                    scoreCard.setScore(score, () => {
+                        setContainerElement(qCard.getElement());
+                        qCard.setQuestion(questions[selected]);
+                    }, isHighest);
+                    setContainerElement(scoreCard.getCard());
+                }
+                qCard.setQuestion(questions[selected]);
+                qCard.setFunctions(next, prev, submit);
+                setContainerElement(qCard.getElement());
+                let startTime = getTime();
+                let endTime = startTime + totalTimeInMilli;
+                let time = startTime;
+                setTimer(totalTimeInMilli);
+                let timerInterval = setInterval(() => {
+                    time = getTime();
+                    remainingTime = endTime - time;
+                    if (remainingTime <= 0) {
+                        clearInterval(timerInterval);
+                        qCard.getSelectedOptions();
+                        setTimer(0);
+                        submit();
+                    } else {
+                        setTimer(remainingTime);
+                    }
+                }, 1000);
+            }
+        ).catch(() => {
+            alert("You are offline");
+        });
     }
 
     function setTimer(remainingTime) {
