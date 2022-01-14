@@ -654,11 +654,7 @@ let controller = (function () {
     let higgestScoreSpan = document.getElementById("higgestScoreSpan");
     let milliSecondsInSecond = 1000;
     let milliSecondsInMinute = 60000;
-<<<<<<< HEAD
     let timeInMin = 30 ;
-=======
-    let timeInMin = 1;
->>>>>>> c21c44e (Changes)
     let totalTimeInMilli = (milliSecondsInMinute * timeInMin);
     let higgestScore = 0;
     let name = "";
