@@ -1,3 +1,77 @@
+
+
+let onlineService = (function() {
+
+    let startId = "start-button";
+    let reloadMessageId = "reload-button";
+
+    let offlineMsg = "Your system is offline ";
+    let onlineBackMsg = "Connected to Internet";
+
+    
+    function online() {
+        setVisibility(reloadMessageId, true);
+        setVisibility(startId, true);
+        setMessage(onlineBackMsg);
+        setTimeout(()=> {
+            setVisibility(reloadMessageId, false);
+        }, 5000);
+    }
+
+    function setVisibility(id, value) {
+        if(document.getElementById(id)) {
+            if(value)
+                document.getElementById(id).style.visibility = "visible";
+            else
+                document.getElementById(id).style.visibility = "hidden";
+        }
+    }
+
+    function setMessage(msg) {
+        document.getElementById(reloadMessageId).innerHTML = msg;
+    }
+    
+    function offline() {
+        setVisibility(reloadMessageId, true);
+        setMessage(offlineMsg);
+        setVisibility(startId, false);
+    }
+    
+    function isOnline() {
+        return navigator.onLine;
+    }
+    
+    function reload() {
+        location.reload();
+    }
+
+    function refresh() {
+        if(!isOnline()) offline();
+        else setVisibility(startId, true);
+    }
+
+    window.addEventListener('online', online);
+    window.addEventListener('offline', offline);
+    
+    return {
+        get OFFLINE_MSG() {
+            return offlineMsg;
+        },
+        get START_BUTTON_ID() {
+            return startId;
+        },
+        get RELOAD_MESSAGE_ID() {
+            return reloadMessageId;
+        },
+        isOnline,
+        reload,
+        refresh
+    }
+})();
+
+
+
+
 let Question = function (idA, titleA, hintA, optionsA, answerA, isMultiA, markA, negativeA, difficultyA) {
     let id = idA;
     let title = titleA;
@@ -111,17 +185,28 @@ let Score = function (nameA, marksA, correctA, wrongA, totalA, timeTakenA) {
 
 let elementBuilder = (function () {
 
-    function createElement(type, className, val, onclick) {
+    function createElement(type, id, className, val, onclick) {
         let element = document.createElement(type);
+        if (id) element.id = id;
         if (className) element.className = className;
         if (val) element.innerHTML = val;
         if (onclick) element.onclick = onclick;
         return element;
     }
 
+    function createInputElement(type, id, className, name, val, onclick, onchange) {
+        let inputElement = createElement("input", id, className, undefined, onclick);
+        if(onchange) inputElement.onchange = onchange;
+        if(val) inputElement.value = val;
+        if(name) inputElement.name = name;
+        if(type) inputElement.type = type;
+        return inputElement;
+    }
+
 
     return {
-        createElement
+        createElement,
+        createInputElement
     };
 })();
 
@@ -133,6 +218,9 @@ let cardBuilder = (function () {
     let CARD_HEADER_CLASS = "card-header";
     let CARD_BODY_CLASS = "card-body";
     let CARD_FOOTER_CLASS = "card-footer";
+    let CARD_HEADER_ID = "card-head";
+    let CARD_FOOTER_ID = "card-foot";
+    let CARD_BODY_ID = "card-body";
 
     function getCard(header, body, footer) {
         let cardElement = document.createElement(CARD_TYPE);
@@ -145,38 +233,34 @@ let cardBuilder = (function () {
         return cardElement;
     }
 
+    function reloadContainer() {
+        let message = elementBuilder.createElement("span", onlineService.RELOAD_MESSAGE_ID, "reload-message");
+        if(onlineService.isOnline())
+            message.style.visibility="hidden";
+        message.innerHTML = onlineService.OFFLINE_MSG;
+        return message;
+    }
+
     function getHeader() {
-        let header = document.createElement(CONTAINER_TYPE)
-        header.classList.add(CARD_HEADER_CLASS);
+        let header = elementBuilder.createElement(CONTAINER_TYPE, CARD_HEADER_ID , CARD_HEADER_CLASS);
+        header.appendChild(reloadContainer());
         return header;
     }
 
     function getBody() {
-        let body = document.createElement(CONTAINER_TYPE)
-        body.classList.add(CARD_BODY_CLASS);
+        let body = elementBuilder.createElement(CONTAINER_TYPE, CARD_BODY_ID, CARD_BODY_CLASS);
         return body;
     }
 
     function getFooter() {
-        let footer = document.createElement(CONTAINER_TYPE)
-        footer.classList.add(CARD_FOOTER_CLASS);
+        let footer = elementBuilder.createElement(CONTAINER_TYPE, CARD_FOOTER_ID, CARD_FOOTER_CLASS);
         return footer;
     }
 
     function createOptionElement(name, val, str, isMultiOptions) {
-        let container = elementBuilder.createElement("div");
-        container.className = "question-option"
-        let input = elementBuilder.createElement("input");
-        if (isMultiOptions)
-            input.type = "checkbox";
-        else
-            input.type = "radio";
-        input.value = val;
-        input.name = name;
-
-        let label = elementBuilder.createElement("label");
-        label.innerHTML = str;
-
+        let container = elementBuilder.createElement("div", undefined, "question-option");
+        let input = elementBuilder.createInputElement(isMultiOptions? "checkbox": "radio", undefined, undefined, name, val);
+        let label = elementBuilder.createElement("label", undefined, undefined, str);
         container.appendChild(input);
         container.appendChild(label);
         return {
@@ -187,16 +271,16 @@ let cardBuilder = (function () {
 
 
     function createPageButton(val, onclick) {
-        let button = elementBuilder.createElement("button", "page-btn", val, onclick);
+        let button = elementBuilder.createElement("button", undefined, "page-btn", val, onclick);
         return button;
     }
 
     function getQuestionCard() {
         let header = getHeader();
-        let id = elementBuilder.createElement("span", "question-id");
-        let difficulty = elementBuilder.createElement("span", "question-difficulty");
-        let title = elementBuilder.createElement("h1", "question-title");
-        let hint = elementBuilder.createElement("span", "question-hint");
+        let id = elementBuilder.createElement("span", undefined, "question-id");
+        let difficulty = elementBuilder.createElement("span", undefined, "question-difficulty");
+        let title = elementBuilder.createElement("h1", undefined, "question-title");
+        let hint = elementBuilder.createElement("span", undefined, "question-hint");
         header.appendChild(id);
         header.appendChild(difficulty);
         header.appendChild(title);
@@ -204,10 +288,10 @@ let cardBuilder = (function () {
         let body = getBody();
         let footer = getFooter();
         let card = getCard(header, body, footer);
-        let prevButton = elementBuilder.createElement("button", "btn", "Previous");
-        let nextButton = elementBuilder.createElement("button", "btn", "Next");
-        let clearButton = elementBuilder.createElement("button", "btn", "Clear");
-        let submitButton = elementBuilder.createElement("button", "btn", "Submit");
+        let prevButton = elementBuilder.createElement("button",undefined, "btn", "Previous");
+        let nextButton = elementBuilder.createElement("button", undefined, "btn", "Next");
+        let clearButton = elementBuilder.createElement("button", undefined, "btn", "Clear");
+        let submitButton = elementBuilder.createElement("button", undefined, "btn", "Submit");
         footer.appendChild(prevButton);
         footer.appendChild(nextButton);
         footer.appendChild(clearButton);
@@ -234,7 +318,7 @@ let cardBuilder = (function () {
 
     function getMessageCard() {
         let header = getHeader();
-        let title = elementBuilder.createElement("h1", "question-title");
+        let title = elementBuilder.createElement("h1", undefined, "question-title");
         header.appendChild(title);
     }
 
@@ -286,18 +370,18 @@ let QuestionCard = function (cardE, idE, difficultyE, titleE, hintE, optionConta
             prev.classList.remove("btn-disabled");
             next.classList.remove("btn-disabled");
         }
-        
-        if(question.isSubmited) {
+
+        if (question.isSubmited) {
             submit.innerHTML = "View Scorecard"
             clear.style.visibility = "hidden";
         } else {
             submit.innerHTML = "Submit"
             clear.style.visibility = "visible";
         }
-        
-        if(currentPageButton)
+
+        if (currentPageButton)
             currentPageButton.classList.remove("page-btn-current");
-        currentPageButton = pageElements[+question.id -1];
+        currentPageButton = pageElements[+question.id - 1];
         currentPageButton.classList.add("page-btn-current");
     }
 
@@ -392,7 +476,7 @@ let QuestionCard = function (cardE, idE, difficultyE, titleE, hintE, optionConta
 
     function markWrongPages(wrongIds) {
         for (let id of wrongIds)
-            pageElements[id-1].classList.add("page-btn-wrong");
+            pageElements[id - 1].classList.add("page-btn-wrong");
     }
 
     return {
@@ -455,10 +539,13 @@ let CustomCard = function (cardE, headerE, bodyE, footerE) {
 let http = (function () {
 
     async function fetchFromURL(url) {
-        let request = fetch(url);
-        let response = await request;
-        let json = await response.json()
-        return json;
+        if(onlineService.isOnline()) {
+            let request = fetch(url);
+            let response = await request;
+            let json = await response.json()
+            return json;
+        }
+        return undefined;
     }
 
     return {
@@ -478,22 +565,25 @@ let quizAPI = (function () {
             url += "&category=" + category;
         if (difficulty && difficulty != "any")
             url += "&difficulty=" + difficulty;
-            
-            
+
+
         let responseJSON = await http.fetchFromURL(url);
-        let results = responseJSON.results;
-        let questions = []
-        let index = 1;
-        for (let e of results) {
-            let options = e.incorrect_answers;
-            let ans = getRandomArbitrary(1, options.length);
-            options.splice(ans - 1, 0, e.correct_answer);
-            questions.push(
-                Question(index, e.question, undefined, options, [ans], false, 2, 1, e.difficulty)
-            );
-            index++;
+        if(responseJSON != undefined) {
+            let results = responseJSON.results;
+            let questions = []
+            let index = 1;
+            for (let e of results) {
+                let options = e.incorrect_answers;
+                let ans = getRandomArbitrary(1, options.length);
+                options.splice(ans - 1, 0, e.correct_answer);
+                questions.push(
+                    Question(index, e.question, undefined, options, [ans], false, 2, 1, e.difficulty)
+                );
+                index++;
+            }
+            return questions;
         }
-        return questions;
+        return undefined;
     }
 
     return {
@@ -564,14 +654,18 @@ let controller = (function () {
     let higgestScoreSpan = document.getElementById("higgestScoreSpan");
     let milliSecondsInSecond = 1000;
     let milliSecondsInMinute = 60000;
+<<<<<<< HEAD
     let timeInMin = 30 ;
+=======
+    let timeInMin = 1;
+>>>>>>> c21c44e (Changes)
     let totalTimeInMilli = (milliSecondsInMinute * timeInMin);
     let higgestScore = 0;
     let name = "";
-    
-    if(localStorage.getItem("QuizhighestScore")) 
+
+    if (localStorage.getItem("QuizhighestScore"))
         setHighest(localStorage.getItem("QuizhighestScore"));
-    if(localStorage.getItem("QuizName"))
+    if (localStorage.getItem("QuizName"))
         setName(localStorage.getItem("QuizName"));
 
     function setHighest(mark) {
@@ -616,14 +710,14 @@ let controller = (function () {
                 let submit = () => {
                     clearInterval(timerInterval);
                     let isHighest = false;
-                    if(score === undefined) {
+                    if (score === undefined) {
                         let marks = 0;
                         let correctCount = 0;
                         let wrongCount = 0;
                         let wrongIds = [];
                         for (let question of questions) {
                             question.submit();
-                            if (question.answer.length != question.selected.length) 
+                            if (question.answer.length != question.selected.length)
                                 continue;
                             wrongIds.push(question.id);
                             wrongCount++;
@@ -646,12 +740,12 @@ let controller = (function () {
                         selected = 0;
                         score = Score(name, marks, correctCount, wrongCount, questions.length, time - startTime);
                         qCard.markWrongPages(wrongIds);
-                        if(marks > higgestScore) {
+                        if (marks > higgestScore) {
                             setHighest(marks);
                             isHighest = true;
                         }
                     }
-                    scoreCard.setScore(score, ()=> {
+                    scoreCard.setScore(score, () => {
                         setContainerElement(qCard.getElement());
                         qCard.setQuestion(questions[selected]);
                     }, isHighest);
@@ -664,10 +758,10 @@ let controller = (function () {
                 let endTime = startTime + totalTimeInMilli;
                 let time = startTime;
                 setTimer(totalTimeInMilli);
-                let timerInterval = setInterval(()=> {
+                let timerInterval = setInterval(() => {
                     time = getTime();
                     remainingTime = endTime - time;
-                    if(remainingTime <= 0) {
+                    if (remainingTime <= 0) {
                         clearInterval(timerInterval);
                         qCard.getSelectedOptions();
                         setTimer(0);
@@ -677,14 +771,16 @@ let controller = (function () {
                     }
                 }, 1000);
             }
-        );
+        ).catch(() => {
+            alert("You are offline");
+        });
     }
 
     function setTimer(remainingTime) {
         let time = getTimeObj(remainingTime);
         timerElement.innerHTML = time.min + " min " + time.sec + " sec";
     }
-    
+
     function getTimeObj(remainingTime) {
         let min = Math.floor(remainingTime / milliSecondsInMinute);
         let sec = Math.ceil((remainingTime % milliSecondsInMinute) / milliSecondsInSecond);
@@ -692,12 +788,12 @@ let controller = (function () {
     }
 
     let getCheckboxElement = (opts, label, onSelectChnage) => {
-        let div = elementBuilder.createElement("div", "config-select-box");
-        let span = elementBuilder.createElement("span", undefined, label);
+        let div = elementBuilder.createElement("div", undefined, "config-select-box");
+        let span = elementBuilder.createElement("span", undefined, undefined, label);
         div.appendChild(span);
-        let select = elementBuilder.createElement("select", undefined);
+        let select = elementBuilder.createElement("select");
         for (let opt of opts) {
-            let optE = elementBuilder.createElement("option", undefined, opt.name);
+            let optE = elementBuilder.createElement("option", undefined, undefined, opt.name);
             optE.value = opt.value;
             select.appendChild(optE);
         }
@@ -707,28 +803,26 @@ let controller = (function () {
     }
 
     function getInputElement(value, label, onChange) {
-        let div = elementBuilder.createElement("div", "config-select-box");
-        let span = elementBuilder.createElement("span", undefined, label);
+        let div = elementBuilder.createElement("div", undefined, "config-select-box");
+        let span = elementBuilder.createElement("span", undefined, undefined, label);
         div.appendChild(span);
-        let input = elementBuilder.createElement("input", undefined);
-        input.value = value;
-        input.onchange = onChange;
+        let input = elementBuilder.createInputElement("text", undefined, undefined, name, value, undefined, onchange);
         div.appendChild(input);
         return div;
     }
 
     let homePageCard = (function () {
         let customCard = cardBuilder.getCustomCard();
-        let title = elementBuilder.createElement("h1", undefined, "Quiz Challenge");
+        let title = elementBuilder.createElement("h1", undefined, undefined, "Quiz Challenge");
         customCard.addToHeader(title);
 
-        let p1 = elementBuilder.createElement("p", undefined, "Try to answer question within time limit");
+        let p1 = elementBuilder.createElement("p", undefined, undefined, "Try to answer question within time limit");
         customCard.addToBody(p1);
 
-        let p2 = elementBuilder.createElement("span", "small-text", "Note: Correct answer will increase score by 2 points and worng answer will reduce score by 1 points");
+        let p2 = elementBuilder.createElement("span", undefined, "small-text", "Note: Correct answer will increase score by 2 points and worng answer will reduce score by 1 points");
         customCard.addToBody(p2);
 
-        let nameInput = getInputElement(name, "Enter you name ", (event)=> {setName(event.target.value)});
+        let nameInput = getInputElement(name, "Enter you name ", (event) => { setName(event.target.value) });
         customCard.addToBody(nameInput);
 
         let categorySelect = getCheckboxElement(categories, "Select Category:", (event) => categoryType = event.target.value);
@@ -737,12 +831,14 @@ let controller = (function () {
         let difficultySelect = getCheckboxElement(difficulties, "Select Difficulty: ", (event) => difficultyType = event.target.value);
         customCard.addToBody(difficultySelect);
 
-        let startbutton = elementBuilder.createElement("button", "btn", "Start Test", startTest)
+        let startbutton = elementBuilder.createElement("button", onlineService.START_BUTTON_ID, "btn", "Start Test", startTest)
+        if(!onlineService.isOnline()) startbutton.style.visibility = "hidden";
         customCard.addToFooter(startbutton);
+
         return customCard;
     })();
 
-    let loadingElement = (function() {
+    let loadingElement = (function () {
         let customCard = cardBuilder.getCustomCard();
         let div = elementBuilder.createElement("div", "center-element");
         let img = elementBuilder.createElement("img");
@@ -750,26 +846,27 @@ let controller = (function () {
         div.appendChild(img);
         customCard.addToBody(div);
         return customCard;
-    }) ();
+    })();
 
     let setContainerElement = (element) => {
-        if(element) {
+        if (element) {
             cardContainer.innerHTML = "";
             cardContainer.appendChild(element);
+            onlineService.refresh();
         }
     }
 
-    let scoreCard = (function() {
+    let scoreCard = (function () {
         let customCard = cardBuilder.getCustomCard();
-        let title = elementBuilder.createElement("h1", undefined, "Test Completed");
+        let title = elementBuilder.createElement("h1", undefined, undefined, "Test Completed");
         customCard.addToHeader(title);
-        let highest = elementBuilder.createElement("p", "highest", "You scored highest in this Exam");
+        let highest = elementBuilder.createElement("p", undefined, "highest", "You scored highest in this Exam");
         customCard.addToHeader(highest);
 
-        let heading = elementBuilder.createElement("h3", undefined, "Results !!!");
+        let heading = elementBuilder.createElement("h3", undefined, undefined, "Results !!!");
         customCard.addToBody(heading);
 
-        let result = elementBuilder.createElement("div","result-tab");
+        let result = elementBuilder.createElement("div", undefined, "result-tab");
         let nameSpan = elementBuilder.createElement("span");
         result.appendChild(nameSpan);
         let markSpan = elementBuilder.createElement("span");
@@ -785,14 +882,14 @@ let controller = (function () {
 
         let timeSpan = elementBuilder.createElement("span");
         result.appendChild(timeSpan);
-        
+
         customCard.addToBody(result);
 
-        let reviewQuestionsButton = elementBuilder.createElement("button", "btn", "Review Questions")
+        let reviewQuestionsButton = elementBuilder.createElement("button", undefined, "btn", "Review Questions")
         customCard.addToFooter(reviewQuestionsButton);
 
-        
-        let homeButton = elementBuilder.createElement("button", "btn", "home", ()=> {
+
+        let homeButton = elementBuilder.createElement("button", undefined, "btn", "home", () => {
             setTimer(totalTimeInMilli);
             setContainerElement(homePageCard.getCard());
         });
@@ -810,10 +907,10 @@ let controller = (function () {
             timeSpan.innerHTML = `Time Taken : ${time.min}m ${time.sec}s`;
             reviewQuestionsButton.onclick = reviewFun;
 
-            if(isHighest) 
-                highest.style.visibility = "visible";
+            if (isHighest)
+                highest.style.display = "block";
             else
-                highest.style.visibility = "hidden";
+                highest.style.display = "none";
         }
 
         function getCard() {
