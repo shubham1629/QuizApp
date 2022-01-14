@@ -148,3 +148,8 @@ body {
 .reload-message {
     float: right;
 }
+
+.loading-image {
+    width: 100%;
+    max-width: 414px;
+}
